@@ -1,0 +1,5 @@
+{
+    "email": "sample@email.com",
+    "password": "!thisIsAPassword",
+    "refreshInterval": 60
+}
