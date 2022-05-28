@@ -455,3 +455,6 @@ $RECYCLE.BIN/
 
 config.json
 sample.graphql
+.vscode/launch.json
+.vscode/settings.json
+.vscode/tasks.json
