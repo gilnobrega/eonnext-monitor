@@ -1,2 +1,2 @@
 # eonnext-monitor
-Tracks eon-next Smart PAYG Electricity Meters
+Tracks e.on next Smart PAYG Electricity Meters
