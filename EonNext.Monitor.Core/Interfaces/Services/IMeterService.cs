@@ -1,0 +1,16 @@
+namespace EonNext.Monitor.Core
+{
+    public interface IMeterService
+    {
+        //Gets total average consumption
+        Consumption GetAverageConsumption(TimeSpan interval);
+        //Gets average consumption since a given timestamp
+        Consumption GetAverageConsumption(TimeSpan interval, DateTime from);
+        //Gets average consumption from timestamp to timestamp        Consumption GetAverageConsumption(TimeSpan interval, DateTime from, DateTime to);
+        Consumption GetAverageConsumption(TimeSpan interval, DateTime from, TimeSpan duration);
+        //How much is left (currently)
+        Consumption GetRemainingConsumption();
+        //How much was left at a given time
+        Consumption GetRemainingConsumption(DateTime from);
+    }
+}

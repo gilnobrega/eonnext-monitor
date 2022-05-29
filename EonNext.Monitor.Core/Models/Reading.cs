@@ -7,7 +7,7 @@ namespace EonNext.Monitor.Core
         //Value of reading whether if its in kwh or pence
         public int Value { get; set; }
         //Time when reading happened
-        public int Timestamp { get; set; }
+        public DateTime Timestamp { get; set; }
         public string MeterId { get; set; }
     }
 }

@@ -7,5 +7,7 @@ namespace EonNext.Monitor.Core
         //price base rate per day in pences
         public int DailyBasePrice { get; set; }
         public string MeterId { get; set; }
+        public DateTime From { get; set; }
+        public DateTime? To { get; set; } //null if currently active
     }
 }

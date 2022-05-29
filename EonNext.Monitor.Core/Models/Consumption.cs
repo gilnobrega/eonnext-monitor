@@ -8,6 +8,6 @@ namespace EonNext.Monitor.Core
         public int Price { get; set; }
         public DateTime From { get; set; }
         public DateTime To { get; set; }
-        public TimeSpan Duration => To - From;
+        public TimeSpan Duration { get; set; }
     }
 }
