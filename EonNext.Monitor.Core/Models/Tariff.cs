@@ -2,9 +2,9 @@ namespace EonNext.Monitor.Core
 {
     public class Tariff
     {
-        //price in pences per kwh
+        //price in cents of pences per kwh
         public int EnergyUnitPrice { get; set; }
-        //price base rate per day in pences
+        //price base rate per day in cents of pences
         public int DailyBasePrice { get; set; }
         public string MeterId { get; set; }
         public DateTime From { get; set; }
