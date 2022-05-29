@@ -4,7 +4,7 @@ namespace EonNext.Monitor.Core
     public class TopUp
     {
         public string MeterId { get; set; }
-        //Amount in pence
+        //Amount in cents of pence
         public int Amount { get; set; }
         public DateTime Timestamp { get; set; }
     }
