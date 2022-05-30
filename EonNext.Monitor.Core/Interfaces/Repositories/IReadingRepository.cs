@@ -2,9 +2,9 @@ namespace EonNext.Monitor.Core
 {
     public interface IReadingRepository
     {
-        //Gets active tariff at a given timestamp
-        Reading GetReading(DateTime? timestamp = null);
+        //Gets all readings
+        List<Reading> GetReadings();
         //Saves reading at given timestamp
-        void SaveReading(Reading reading, DateTime? timestamp = null);
+        void SaveReading(Reading reading);
     }
 }

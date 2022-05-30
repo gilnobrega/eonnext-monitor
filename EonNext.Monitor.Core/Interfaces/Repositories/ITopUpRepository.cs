@@ -1,10 +1,10 @@
 namespace EonNext.Monitor.Core
 {
-    public interface ITariffRepository
+    public interface ITopUpRepository
     {
         //Gets active tariff at a given timestamp
-        Tariff GetTariff(DateTime? timestamp = null);
+        List<TopUp> GetTopUp();
         //Saves Tariff at a given timestamp
-        void SaveTariff(Tariff tariff);
+        void SaveTopUp(TopUp topUp);
     }
 }
