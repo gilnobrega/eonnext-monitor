@@ -20,7 +20,7 @@ namespace EonNext.Monitor.Test
             graphQLClientMock = new Mock<IGraphQLClient>();
             graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.accountInfoRequest, default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
             {
-                Data = new JObject(new JProperty("fullName", "Joe Smith"), new JProperty("accounts", new JArray(new JObject(new JProperty("number", "A1234")))))
+                Data = new JObject(new JProperty("viewer", new JObject(new JProperty("fullName", "Joe Smith"), new JProperty("accounts", new JArray(new JObject(new JProperty("number", "A1234")))))))
             }));
 
             EonNextClient client = new EonNextClient

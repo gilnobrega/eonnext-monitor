@@ -78,14 +78,16 @@ viewer {
 
         public async Task<(string, string)> GetFullNameAndAccountNumber()
         {
-            var response = await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest);
+            JObject? viewer = (await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest)).Data["viewer"] as JObject;
 
-            string? fullName = ((string?)response.Data["fullName"]);
+            if (viewer == null) return ("N/A", "N/A");
+
+            string? fullName = ((string?)viewer["fullName"]);
             string? accountNumber = null;
 
-            if (response.Data["accounts"] != null && response.Data["accounts"][0] != null)
+            if (viewer["accounts"] != null && viewer["accounts"][0] != null)
             {
-                accountNumber = (((string?)response.Data["accounts"][0]["number"]));
+                accountNumber = (((string?)viewer["accounts"][0]["number"]));
             }
 
             return (fullName ?? "N/A", accountNumber ?? "N/A");
