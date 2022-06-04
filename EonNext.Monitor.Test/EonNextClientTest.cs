@@ -2,11 +2,10 @@ using Xunit;
 using Moq;
 using FluentAssertions;
 using EonNext.Monitor.Core;
-using System.Collections.Generic;
-using System;
 using GraphQL.Client.Abstractions;
 using GraphQL;
 using System.Threading.Tasks;
+using Newtonsoft.Json.Linq;
 
 namespace EonNext.Monitor.Test
 {
@@ -14,30 +13,22 @@ namespace EonNext.Monitor.Test
     {
         Mock<IGraphQLClient> graphQLClientMock;
 
-        EonNextClientTest()
-        {
-        }
-
         [Fact]
-        public void Should_ReturnFullNameAndAccountNumber()
+        public async void Should_ReturnFullNameAndAccountNumber()
         {
 
             graphQLClientMock = new Mock<IGraphQLClient>();
-            graphQLClientMock.Setup(client => client.SendQueryAsync<dynamic>(EonNextClient.accountInfoRequest, default)).Returns(Task.FromResult(new GraphQLResponse<dynamic>()
+            graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.accountInfoRequest, default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
             {
-                Data = {
-                    fullName = "Joe Smith",
-                    accounts = new List<dynamic> {
-                        new {
-                            number = "A1234"
-                        }
-                    }
-                }
+                Data = new JObject(new JProperty("fullName", "Joe Smith"), new JProperty("accounts", new JArray(new JObject(new JProperty("number", "A1234")))))
             }));
 
-            EonNextClient client = new EonNextClient();
+            EonNextClient client = new EonNextClient
+            {
+                GraphQLClient = graphQLClientMock.Object
+            };
 
-            (string fullName, string accountNumber) = client.GetFullNameAndAccountNumber();
+            (string fullName, string accountNumber) = await client.GetFullNameAndAccountNumber();
 
             fullName.Should().Be("Joe Smith");
             accountNumber.Should().Be("A1234");

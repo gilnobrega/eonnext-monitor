@@ -1,7 +1,8 @@
 using GraphQL.Client;
-using GraphQL.Client.Serializer.SystemTextJson;
 using GraphQL.Client.Abstractions;
 using GraphQL;
+using System.Text.Json;
+using Newtonsoft.Json.Linq;
 
 namespace EonNext.Monitor.Core
 {
@@ -75,9 +76,19 @@ viewer {
             throw new NotImplementedException();
         }
 
-        public (string, string) GetFullNameAndAccountNumber()
+        public async Task<(string, string)> GetFullNameAndAccountNumber()
         {
-            throw new NotImplementedException();
+            var response = await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest);
+
+            string? fullName = ((string?)response.Data["fullName"]);
+            string? accountNumber = null;
+
+            if (response.Data["accounts"] != null && response.Data["accounts"][0] != null)
+            {
+                accountNumber = (((string?)response.Data["accounts"][0]["number"]));
+            }
+
+            return (fullName ?? "N/A", accountNumber ?? "N/A");
         }
 
         public void Login(string email, string password)
