@@ -11,5 +11,6 @@ namespace EonNext.Monitor.Core
         Reading GetMostRecentReading(String meterId);
         Tariff GetCurrentTariff(String meterId);
         TopUp GetMostRecentPayment(String meterId);
+        (string, string) GetFullNameAndAccountNumber();
     }
 }

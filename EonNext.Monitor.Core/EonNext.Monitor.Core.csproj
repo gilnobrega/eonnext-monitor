@@ -10,6 +10,7 @@
     <PackageReference Include="GraphQL.Client" Version="4.0.2" />
     <PackageReference Include="GraphQL.Client.Abstractions" Version="4.0.2" />
     <PackageReference Include="GraphQL.Client.Serializer.SystemTextJson" Version="4.0.2" />
+    <PackageReference Include="GraphQL.Primitives" Version="4.0.2" />
   </ItemGroup>
 
 </Project>
