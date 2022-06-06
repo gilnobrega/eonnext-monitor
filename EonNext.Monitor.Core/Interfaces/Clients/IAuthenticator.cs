@@ -6,5 +6,6 @@ namespace EonNext.Monitor.Core
         Task Login(string email, string password);
         void Logout();
         bool IsLoggedIn();
+        Task<(string, string)> GetFullNameAndAccountNumber();
     }
 }

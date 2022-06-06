@@ -1,4 +1,3 @@
-using GraphQL.Client.Abstractions;
 using GraphQL;
 using Newtonsoft.Json.Linq;
 
@@ -7,18 +6,6 @@ namespace EonNext.Monitor.Core
     public partial class EonNextClient : IEnergyClient
     {
         public string FullName { get; private set; }
-
-        public static GraphQLRequest accountInfoRequest = new GraphQLRequest
-        {
-            Query = @"
-viewer {
-    fullName
-    accounts {
-        number
-    }
-}
-            "
-        };
 
         public static GraphQLRequest activeMeterIdsRequest = new GraphQLRequest
         {
@@ -48,7 +35,6 @@ viewer {
         public IReadingRepository ReadingRepository { get; set; }
         public ITariffRepository TariffRepository { get; set; }
         public ITopUpRepository TopUpRepository { get; set; }
-        public IGraphQLClient GraphQLClient { get; set; }
 
         public List<string> GetActiveMeterIds()
         {
@@ -68,23 +54,6 @@ viewer {
         public Reading GetMostRecentReading(string meterId)
         {
             throw new NotImplementedException();
-        }
-
-        public async Task<(string, string)> GetFullNameAndAccountNumber()
-        {
-            JObject? viewer = (await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest)).Data["viewer"] as JObject;
-
-            if (viewer == null) return ("N/A", "N/A");
-
-            string? fullName = ((string?)viewer["fullName"]);
-            string? accountNumber = null;
-
-            if (viewer["accounts"] != null && viewer["accounts"][0] != null)
-            {
-                accountNumber = (((string?)viewer["accounts"][0]["number"]));
-            }
-
-            return (fullName ?? "N/A", accountNumber ?? "N/A");
         }
 
         public void UpdateDatabase()

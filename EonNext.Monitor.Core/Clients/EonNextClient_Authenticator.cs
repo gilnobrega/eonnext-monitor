@@ -1,5 +1,5 @@
-using GraphQL.Client.Abstractions;
 using GraphQL;
+using GraphQL.Client.Http;
 using Newtonsoft.Json.Linq;
 
 namespace EonNext.Monitor.Core
@@ -17,6 +17,18 @@ namespace EonNext.Monitor.Core
     token
     refreshExpiresIn
 }"
+        };
+
+        public static GraphQLRequest accountInfoRequest = new GraphQLRequest
+        {
+            Query = @"
+viewer {
+    fullName
+    accounts {
+        number
+    }
+}
+            "
         };
 
         public bool IsLoggedIn()
@@ -38,12 +50,35 @@ namespace EonNext.Monitor.Core
 
             AuthenticationToken = (string?)obtainKrakenToken["token"];
             TokenExpirationDate = DateTimeOffset.FromUnixTimeSeconds((int?)obtainKrakenToken["refreshExpiresIn"] ?? 0).UtcDateTime;
+
+            //Updates authorization header in httpclient
+            if (GraphQLClient is GraphQLHttpClient client)
+            {
+                client.HttpClient.DefaultRequestHeaders.Add("Authorization", AuthenticationToken);
+            }
         }
 
         public void Logout()
         {
             AuthenticationToken = null;
             TokenExpirationDate = null;
+        }
+
+        public async Task<(string, string)> GetFullNameAndAccountNumber()
+        {
+            JObject? viewer = (await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest)).Data["viewer"] as JObject;
+
+            if (viewer == null) return ("N/A", "N/A");
+
+            string? fullName = ((string?)viewer["fullName"]);
+            string? accountNumber = null;
+
+            if (viewer["accounts"] != null && viewer["accounts"][0] != null)
+            {
+                accountNumber = (((string?)viewer["accounts"][0]["number"]));
+            }
+
+            return (fullName ?? "N/A", accountNumber ?? "N/A");
         }
 
     }
