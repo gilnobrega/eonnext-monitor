@@ -7,25 +7,44 @@ namespace EonNext.Monitor.Core
     public partial class EonNextClient : IAuthenticator
     {
         public string? AuthenticationToken { get; set; }
-        public DateTime? TokenExpirationDate { get; set; }
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpirationDate { get; set; }
 
         public static GraphQLRequest GenerateAuthenticationTokenRequest(string email, string password) => new GraphQLRequest
         {
             Query = @"
-  obtainKrakenToken(input: {email: """ + email + @""", password: """ + password + @"""}) 
-{
-    token
-    refreshExpiresIn
+mutation { 
+    obtainKrakenToken(input: {email: """ + email + @""", password: """ + password + @"""}) 
+    {
+        token
+        refreshToken
+        refreshExpiresIn
+    } 
+}"
+        };
+
+        public static GraphQLRequest GenerateAuthenticationTokenRefreshRequest(string refreshToken) => new GraphQLRequest
+        {
+            Query = @"
+mutation { 
+    obtainKrakenToken(input: {refreshToken: """ + refreshToken + @"""}) 
+    {
+        token
+        refreshToken
+        refreshExpiresIn
+    } 
 }"
         };
 
         public static GraphQLRequest accountInfoRequest = new GraphQLRequest
         {
             Query = @"
-viewer {
-    fullName
-    accounts {
-        number
+query { 
+    viewer {
+        fullName
+        accounts {
+            number
+        }
     }
 }
             "
@@ -33,35 +52,40 @@ viewer {
 
         public bool IsLoggedIn()
         {
-            if (TokenExpirationDate == null) return false;
+            if (RefreshTokenExpirationDate == null || RefreshToken == null) return false;
 
-            if (DateTimeProvider.GetCurrentDate() > TokenExpirationDate) return false;
+            if (DateTimeProvider.GetCurrentDate() > RefreshTokenExpirationDate) return false;
 
             return true;
         }
 
-        public async Task Login(string email, string password)
+        public async Task Login(string? email = null, string? password = null)
         {
-            if (IsLoggedIn()) return;
+            //refreshes authentication token if already logged in
+            GraphQLRequest request = IsLoggedIn() ?
+                                        GenerateAuthenticationTokenRefreshRequest(RefreshToken) :
+                                        GenerateAuthenticationTokenRequest(email, password);
 
-            JObject? obtainKrakenToken = (await GraphQLClient.SendQueryAsync<JObject>(GenerateAuthenticationTokenRequest(email, password))).Data["obtainKrakenToken"] as JObject;
+            JObject? obtainKrakenToken = (await GraphQLClient.SendQueryAsync<JObject>(request)).Data["obtainKrakenToken"] as JObject;
 
             if (obtainKrakenToken == null || obtainKrakenToken["refreshExpiresIn"] == null || obtainKrakenToken["token"] == null) return;
 
             AuthenticationToken = (string?)obtainKrakenToken["token"];
-            TokenExpirationDate = DateTimeOffset.FromUnixTimeSeconds((int?)obtainKrakenToken["refreshExpiresIn"] ?? 0).UtcDateTime;
+            RefreshToken = (string?)obtainKrakenToken["refreshToken"];
+            RefreshTokenExpirationDate = DateTimeOffset.FromUnixTimeSeconds((int?)obtainKrakenToken["refreshExpiresIn"] ?? 0).UtcDateTime;
 
             //Updates authorization header in httpclient
             if (GraphQLClient is GraphQLHttpClient client)
             {
-                client.HttpClient.DefaultRequestHeaders.Add("Authorization", AuthenticationToken);
+                client.HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", AuthenticationToken);
             }
         }
 
         public void Logout()
         {
             AuthenticationToken = null;
-            TokenExpirationDate = null;
+            RefreshTokenExpirationDate = null;
+            RefreshToken = null;
         }
 
         public async Task<(string, string)> GetFullNameAndAccountNumber()

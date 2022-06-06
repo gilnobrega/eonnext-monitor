@@ -13,9 +13,11 @@ namespace EonNext.Monitor.Core
 
         public EonNextClient()
         {
-            if (GraphQLClient != null) return;
+            if (GraphQLClient == null)
+                GraphQLClient = new GraphQLHttpClient(_endpoint, new NewtonsoftJsonSerializer());
 
-            GraphQLClient = new GraphQLHttpClient(_endpoint, new NewtonsoftJsonSerializer());
+            if (DateTimeProvider == null)
+                DateTimeProvider = new DateTimeProvider();
         }
     }
 }

@@ -50,7 +50,7 @@ namespace EonNext.Monitor.Test
             graphQLClientMock = new Mock<IGraphQLClient>();
             graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.GenerateAuthenticationTokenRequest("Test", "1234"), default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
             {
-                Data = new JObject(new JProperty("obtainKrakenToken", new JObject(new JProperty("token", "testToken"), new JProperty("refreshExpiresIn", ((DateTimeOffset)expirationDate).ToUnixTimeSeconds()))))
+                Data = new JObject(new JProperty("obtainKrakenToken", new JObject(new JProperty("token", "testToken"), new JProperty("refreshExpiresIn", ((DateTimeOffset)expirationDate).ToUnixTimeSeconds()), new JProperty("refreshToken", "testRefreshToken"))))
             }));
 
             EonNextClient client = new EonNextClient
@@ -62,13 +62,15 @@ namespace EonNext.Monitor.Test
             await client.Login("Test", "1234");
 
             client.AuthenticationToken.Should().Be("testToken");
-            client.TokenExpirationDate.Should().Be(expirationDate);
+            client.RefreshTokenExpirationDate.Should().Be(expirationDate);
+            client.RefreshToken.Should().Be("testRefreshToken");
 
             client.IsLoggedIn().Should().BeTrue();
 
             client.Logout();
             client.AuthenticationToken.Should().Be(null);
-            client.TokenExpirationDate.Should().Be(null);
+            client.RefreshTokenExpirationDate.Should().Be(null);
+            client.RefreshToken.Should().Be(null);
 
             client.IsLoggedIn().Should().BeFalse();
         }
@@ -80,7 +82,7 @@ namespace EonNext.Monitor.Test
             graphQLClientMock = new Mock<IGraphQLClient>();
             graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.GenerateAuthenticationTokenRequest("Test", "1234"), default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
             {
-                Data = new JObject(new JProperty("obtainKrakenToken", new JObject(new JProperty("token", "testToken"), new JProperty("refreshExpiresIn", ((DateTimeOffset)expirationDate).ToUnixTimeSeconds()))))
+                Data = new JObject(new JProperty("obtainKrakenToken", new JObject(new JProperty("token", "testToken"), new JProperty("refreshExpiresIn", ((DateTimeOffset)expirationDate).ToUnixTimeSeconds()), new JProperty("refreshToken", "testRefreshToken"))))
             }));
 
             EonNextClient client = new EonNextClient
@@ -92,7 +94,8 @@ namespace EonNext.Monitor.Test
             await client.Login("Test", "1234");
 
             client.AuthenticationToken.Should().Be("testToken");
-            client.TokenExpirationDate.Should().Be(expirationDate);
+            client.RefreshTokenExpirationDate.Should().Be(expirationDate);
+            client.RefreshToken.Should().Be("testRefreshToken");
 
             client.IsLoggedIn().Should().BeFalse();
         }
