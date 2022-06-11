@@ -6,8 +6,8 @@ namespace EonNext.Monitor.Core
 {
     public partial class EonNextClient
     {
-        public IGraphQLClient? GraphQLClient { get; set; }
-        public IDateTimeProvider? DateTimeProvider { get; set; }
+        public IGraphQLClient GraphQLClient { get; set; }
+        public IDateTimeProvider DateTimeProvider { get; set; }
 
         private const string _endpoint = "https://api.eonnext-kraken.energy/v1/graphql/";
 

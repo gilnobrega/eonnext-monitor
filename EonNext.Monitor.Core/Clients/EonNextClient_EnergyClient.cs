@@ -5,11 +5,25 @@ namespace EonNext.Monitor.Core
 {
     public partial class EonNextClient : IEnergyClient
     {
-        public string FullName { get; private set; }
-
-        public static GraphQLRequest activeMeterIdsRequest = new GraphQLRequest
+        public static GraphQLRequest activeMetersRequest(string accountNumber) => new GraphQLRequest
         {
             Query = @"
+query {
+    account(accountNumber: """ + accountNumber + @""") {
+        properties {
+            electricityMeterPoints {
+                mpan
+                meters(includeInactive: false) {
+                    smartDevices {
+                        serialNumber
+                        deviceId
+                    }
+                    fuelType
+                }
+            }
+        }
+    }
+}
             "
         };
 
@@ -36,7 +50,7 @@ namespace EonNext.Monitor.Core
         public ITariffRepository TariffRepository { get; set; }
         public ITopUpRepository TopUpRepository { get; set; }
 
-        public List<string> GetActiveMeterIds()
+        public List<Meter> GetActiveMeters(string accountNumber)
         {
             throw new NotImplementedException();
         }

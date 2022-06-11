@@ -6,7 +6,9 @@ using GraphQL.Client.Abstractions;
 using GraphQL;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using Newtonsoft.Json.Converters;
 using System;
+using Newtonsoft.Json;
 
 namespace EonNext.Monitor.Test
 {
@@ -24,12 +26,12 @@ namespace EonNext.Monitor.Test
         }
 
         [Fact]
-        public async void Should_ReturnFullNameAndAccountNumber()
+        public async void Should_ReturnAccountNumber()
         {
             graphQLClientMock = new Mock<IGraphQLClient>();
             graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.accountInfoRequest, default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
             {
-                Data = new JObject(new JProperty("viewer", new JObject(new JProperty("fullName", "Joe Smith"), new JProperty("accounts", new JArray(new JObject(new JProperty("number", "A1234")))))))
+                Data = new JObject(new JProperty("viewer", new JObject(new JProperty("accounts", new JArray(new JObject(new JProperty("number", "A1234")))))))
             }));
 
             EonNextClient client = new EonNextClient
@@ -37,9 +39,8 @@ namespace EonNext.Monitor.Test
                 GraphQLClient = graphQLClientMock.Object
             };
 
-            (string fullName, string accountNumber) = await client.GetFullNameAndAccountNumber();
+            string? accountNumber = await client.GetAccountNumber();
 
-            fullName.Should().Be("Joe Smith");
             accountNumber.Should().Be("A1234");
         }
 
@@ -98,6 +99,52 @@ namespace EonNext.Monitor.Test
             client.RefreshToken.Should().Be("testRefreshToken");
 
             client.IsLoggedIn().Should().BeFalse();
+        }
+
+        [Fact]
+        public async void Should_ReturnActiveMeters()
+        {
+            graphQLClientMock = new Mock<IGraphQLClient>();
+            graphQLClientMock.Setup(client => client.SendQueryAsync<JObject>(EonNextClient.activeMetersRequest("A1234"), default)).Returns(Task.FromResult(new GraphQLResponse<JObject>()
+            {
+                Data = JsonConvert.DeserializeObject<JObject>(@"
+{
+    ""account"": {
+      ""properties"": [
+        {
+            ""electricityMeterPoints"": [
+            {
+              ""mpan"": ""testMpan"",
+              ""meters"": [
+                {
+                  ""smartDevices"": [
+                    {
+                      ""serialNumber"": ""testSerialNumber"",
+                      ""deviceId"": ""testDeviceId""
+                    }
+                  ],
+                  ""fuelType"": ""electricity""
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  }              
+                ")
+            }));
+
+            EonNextClient client = new EonNextClient
+            {
+                GraphQLClient = graphQLClientMock.Object,
+            };
+
+            var meters = client.GetActiveMeters("A1234");
+
+            meters.Count.Should().Be(1);
+            meters[0].Mpan.Should().Be("testMpan");
+            meters[0].SerialNumber.Should().Be("testSerialNumber");
         }
     }
 }
