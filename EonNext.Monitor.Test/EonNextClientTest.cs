@@ -140,7 +140,7 @@ namespace EonNext.Monitor.Test
                 GraphQLClient = graphQLClientMock.Object,
             };
 
-            var meters = client.GetActiveMeters("A1234");
+            var meters = await client.GetActiveMeters("A1234");
 
             meters.Count.Should().Be(1);
             meters[0].Mpan.Should().Be("testMpan");

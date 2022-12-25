@@ -50,9 +50,39 @@ query {
         public ITariffRepository TariffRepository { get; set; }
         public ITopUpRepository TopUpRepository { get; set; }
 
-        public List<Meter> GetActiveMeters(string accountNumber)
+        public async Task<List<Meter>> GetActiveMeters(string accountNumber)
         {
-            throw new NotImplementedException();
+            JObject? account = (await GraphQLClient.SendQueryAsync<JObject>(activeMetersRequest(accountNumber))).Data["account"] as JObject;
+            JArray? properties = account?["properties"] as JArray;
+            JArray? electricityMeterPoints = properties?[0]["electricityMeterPoints"] as JArray;
+
+            List<Meter> finalMeters = new List<Meter>();
+
+            if (electricityMeterPoints == null) return finalMeters;
+
+            foreach (JObject points in electricityMeterPoints)
+            {
+                string mpan = (string)points["mpan"];
+
+                JArray? meters = points["meters"] as JArray;
+
+                foreach (JObject meterData in meters)
+                {
+                    JArray? smartDevices = meterData["smartDevices"] as JArray;
+
+                    foreach (JObject smartDevice in smartDevices)
+                    {
+                        Meter meter = new Meter();
+                        meter.Mpan = mpan;
+                        meter.Id = (string)smartDevice["deviceId"];
+                        meter.SerialNumber = (string)smartDevice["serialNumber"];
+
+                        finalMeters.Add(meter);
+                    }
+                }
+            }
+
+            return finalMeters;
         }
 
         public Tariff GetCurrentTariff(string meterId)

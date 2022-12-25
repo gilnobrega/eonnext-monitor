@@ -18,7 +18,10 @@ await client.Login(email, password);
 
 Console.WriteLine(client.AuthenticationToken);
 
-await client.Login();
+string? accountNumber = await client.GetAccountNumber();
+Console.WriteLine(accountNumber);
 
-Console.WriteLine(client.AuthenticationToken);
+var meters = await client.GetActiveMeters(accountNumber);
+
+Console.WriteLine(meters);
 

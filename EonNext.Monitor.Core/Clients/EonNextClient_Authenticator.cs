@@ -75,9 +75,9 @@ query {
             RefreshTokenExpirationDate = DateTimeOffset.FromUnixTimeSeconds((int?)obtainKrakenToken["refreshExpiresIn"] ?? 0).UtcDateTime;
 
             //Updates authorization header in httpclient
-            if (GraphQLClient is GraphQLHttpClient client)
+            if (GraphQLClient is GraphQLHttpClient client && AuthenticationToken != null)
             {
-                client.HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Authorization", AuthenticationToken);
+                client.HttpClient.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue(AuthenticationToken);  
             }
         }
 
@@ -91,7 +91,7 @@ query {
         public async Task<string?> GetAccountNumber()
         {
             JObject? viewer = (await GraphQLClient.SendQueryAsync<JObject>(accountInfoRequest)).Data["viewer"] as JObject;
-
+            
             if (viewer == null || viewer["accounts"] == null || viewer["accounts"][0] == null) return null;
 
             return (((string?)viewer["accounts"][0]["number"]));
